@@ -1,2 +1,2 @@
-# JavaML
-机器学习算法Java实现
+# JavaDataMining
+数据挖掘算法Java实现
