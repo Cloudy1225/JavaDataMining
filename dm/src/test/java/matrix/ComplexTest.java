@@ -1,4 +1,4 @@
-package test.java.ndarray;
+package test.java.matrix;
 
 import main.java.matrix.Complex;
 import org.junit.Assert;

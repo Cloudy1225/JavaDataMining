@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/JavaML.iml" filepath="$PROJECT_DIR$/JavaML.iml" />
+      <module fileurl="file://$PROJECT_DIR$/JavaDataMining.iml" filepath="$PROJECT_DIR$/JavaDataMining.iml" />
       <module fileurl="file://$PROJECT_DIR$/dm/dm.iml" filepath="$PROJECT_DIR$/dm/dm.iml" />
     </modules>
   </component>
