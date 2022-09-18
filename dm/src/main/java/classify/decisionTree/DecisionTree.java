@@ -144,6 +144,7 @@ public abstract class DecisionTree implements Evaluatable {
      * @param dataset training set
      * @param classWeight class weights
      * @param sampleWeight sample weights
+     * @deprecated It is advised that set weights use {@link ClassWeightUtil#setWeight(DataSet, Map, double[])} before this.
      */
     public void fit(DataSet dataset, Map<Double, Double> classWeight, double[] sampleWeight) {
         this.preprocess(dataset, classWeight, sampleWeight); // instanceWeight = classWeight * sampleWeight

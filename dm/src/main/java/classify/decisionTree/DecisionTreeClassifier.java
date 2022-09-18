@@ -112,11 +112,6 @@ public class DecisionTreeClassifier implements Classifier {
     }
 
     @Override
-    public void fit(DataSet dataset, Map<Double, Double> classWeight, double[] sampleWeight) {
-        this.tree.fit(dataset, classWeight, sampleWeight);
-    }
-
-    @Override
     public double classify(Instance instance) {
         return this.tree.predict(instance);
     }
