@@ -16,7 +16,7 @@ import java.util.*;
  * @see Evaluatable
  * @see DecisionTreeClassifier
  */
-public abstract class DecisionTree implements Evaluatable {
+public abstract class DecisionTree implements Evaluatable, WeightHandler {
 
     /**
      * Constructs a decision tree classifier with default constraint conditions.

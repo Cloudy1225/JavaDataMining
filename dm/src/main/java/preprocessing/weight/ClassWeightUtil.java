@@ -2,6 +2,7 @@ package main.java.preprocessing.weight;
 
 import main.java.core.DataSet;
 import main.java.core.Instance;
+import main.java.core.WeightHandler;
 import main.java.utils.ArrayUtil;
 
 import java.util.Map;
@@ -18,7 +19,7 @@ import java.util.TreeMap;
  *
  * @author Cloudy1225
  */
-public class ClassWeightUtil {
+public class ClassWeightUtil implements WeightHandler {
 
     /**
      * Sets each instance's weight.

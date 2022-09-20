@@ -1,7 +1,7 @@
 package main.java.classify.decisionTree;
 
 import main.java.core.*;
-import main.java.utils.DataUtil;
+import main.java.utils.MathUtil;
 
 import java.util.*;
 
@@ -116,9 +116,9 @@ public class ID3Tree extends DecisionTree {
                 for (double weightedNumber: distMap.values()) {
                     if (weightedNumber == 0) continue;
                     subWeightedNumber += weightedNumber;
-                    subEntropy -= (weightedNumber * DataUtil.log2(weightedNumber));
+                    subEntropy -= (weightedNumber * MathUtil.log2(weightedNumber));
                 }
-                subEntropy = subEntropy / subWeightedNumber + DataUtil.log2(subWeightedNumber);
+                subEntropy = subEntropy / subWeightedNumber + MathUtil.log2(subWeightedNumber);
                 thisSplitEntropy += subWeightedNumber * subEntropy;
                 totalWeightedNumber += subWeightedNumber;
             }
@@ -140,9 +140,9 @@ public class ID3Tree extends DecisionTree {
             for (double weightedNumber: distMap.values()) {
                 if (weightedNumber == 0) continue;
                 subWeightedNumber += weightedNumber;
-                subEntropy -= (weightedNumber * DataUtil.log2(weightedNumber));
+                subEntropy -= (weightedNumber * MathUtil.log2(weightedNumber));
             }
-            subEntropy = subEntropy / subWeightedNumber + DataUtil.log2(subWeightedNumber);
+            subEntropy = subEntropy / subWeightedNumber + MathUtil.log2(subWeightedNumber);
             totalWeightedNumber += subWeightedNumber;
             improvement -= subWeightedNumber * subEntropy / this.weightedNSamples;
             thresholdImpurityMap.put(threshold, subEntropy);
@@ -194,9 +194,9 @@ public class ID3Tree extends DecisionTree {
         for (double eachWeightedNumber: classDistMap.values()) {
             if (eachWeightedNumber == 0) continue;
             totalWeightedNumber += eachWeightedNumber;
-            entropy -= eachWeightedNumber * DataUtil.log2(eachWeightedNumber);
+            entropy -= eachWeightedNumber * MathUtil.log2(eachWeightedNumber);
         }
-        entropy = entropy / totalWeightedNumber + DataUtil.log2(totalWeightedNumber);
+        entropy = entropy / totalWeightedNumber + MathUtil.log2(totalWeightedNumber);
         return entropy;
     }
 

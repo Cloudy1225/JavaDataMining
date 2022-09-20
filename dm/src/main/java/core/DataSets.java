@@ -9,7 +9,7 @@ import java.util.*;
  * @see DataSet
  * @see StandardDataSet
  */
-public class DataSets {
+public class DataSets implements WeightHandler {
 
     /**
      * Prints the given data sets. ({@code System.put.println)})
@@ -228,5 +228,47 @@ public class DataSets {
             sum += instance.getWeight();
         }
         return sum;
+    }
+
+    /**
+     * Computes the variance of the specified attribute values in a dataset.
+     *
+     * @param dataset given dataset
+     * @param index [0, dimensionality-1]: the index of the specified attribute or -1: the index of class
+     * @return the variance
+     */
+    public static double var(DataSet dataset, int index) {
+        int n = dataset.size();
+        double sumX_i2 = 0;
+        double sumX_i = 0;
+        if (index == -1) {
+            for (Instance instance: dataset) {
+                double classValue = instance.classValue();
+                sumX_i2 += classValue * classValue;
+                sumX_i += classValue;
+            }
+        } else {
+            for (Instance instance: dataset) {
+                double attrValue = instance.attribute(index);
+                sumX_i2 += attrValue * attrValue;
+                sumX_i += attrValue;
+            }
+        }
+        return (sumX_i2 - sumX_i/n*sumX_i) / n;
+    }
+
+    /**
+     * Computes the variance of each attribute in a dataset.
+     *
+     * @param dataset given dataset
+     * @return a new array containing the variance
+     */
+    public static double[] var(DataSet dataset) {
+        int dimension = dataset.dimensionality();
+        double[] variance = new double[dimension];
+        for (int i = 0; i < dimension; i++) {
+            variance[i] = var(dataset, i);
+        }
+        return variance;
     }
 }

@@ -2,7 +2,7 @@ package main.java.classify.decisionTree;
 
 import main.java.core.*;
 import main.java.utils.ArrayUtil;
-import main.java.utils.DataUtil;
+import main.java.utils.MathUtil;
 
 import java.util.*;
 
@@ -232,16 +232,16 @@ public class C45Tree extends DecisionTree {
                         for (double weightedNumber: ltConDistMap.values()) {
                             if (weightedNumber == 0) continue;
                             ltWeightedNumber += weightedNumber;
-                            ltEnt -= weightedNumber * DataUtil.log2(weightedNumber);
+                            ltEnt -= weightedNumber * MathUtil.log2(weightedNumber);
                         }
-                        ltEnt = ltEnt / ltWeightedNumber + DataUtil.log2(ltWeightedNumber);
+                        ltEnt = ltEnt / ltWeightedNumber + MathUtil.log2(ltWeightedNumber);
                         double gtEnt = 0;
                         for (double weightedNumber: gtConDistMap.values()) {
                             if (weightedNumber == 0) continue;
-                            gtEnt -= weightedNumber * DataUtil.log2(weightedNumber);
+                            gtEnt -= weightedNumber * MathUtil.log2(weightedNumber);
                         }
                         double gtWeightedNumber = sumWeightedNumber - ltWeightedNumber;
-                        gtEnt = gtEnt / gtWeightedNumber + DataUtil.log2(gtWeightedNumber);
+                        gtEnt = gtEnt / gtWeightedNumber + MathUtil.log2(gtWeightedNumber);
                         double infoGain = classEnt - ltWeightedNumber/sumWeightedNumber*ltEnt - gtWeightedNumber/sumWeightedNumber*gtEnt;
                         if (infoGain > maxGain) {
                             maxGain = infoGain;
@@ -267,9 +267,9 @@ public class C45Tree extends DecisionTree {
                     for (double weightedNumber: distMap.values()) {
                         if (weightedNumber == 0) continue;
                         subWeightedNumber += weightedNumber;
-                        subEntropy -= (weightedNumber * DataUtil.log2(weightedNumber));
+                        subEntropy -= (weightedNumber * MathUtil.log2(weightedNumber));
                     }
-                    subEntropy = subEntropy / subWeightedNumber + DataUtil.log2(subWeightedNumber);
+                    subEntropy = subEntropy / subWeightedNumber + MathUtil.log2(subWeightedNumber);
                     thisSplitEntropy += subWeightedNumber * subEntropy;
                 }
                 thisSplitEntropy /= sumWeightedNumber;
@@ -286,7 +286,7 @@ public class C45Tree extends DecisionTree {
                 double splitInfo = 0;
                 for (double eachWeightedNumber: distMap.values()) {
                     double p_i = eachWeightedNumber / sumWeightedNumber;
-                    splitInfo -= p_i * DataUtil.log2(p_i);
+                    splitInfo -= p_i * MathUtil.log2(p_i);
                 }
                 double gainRatio = infoGains[i] / splitInfo;
                 if (gainRatio > maxGainRatio) {
@@ -335,7 +335,7 @@ public class C45Tree extends DecisionTree {
         double entropy = 0;
         for (double eachWeightedNumber: classDistMap.values()) {
             double p_i = eachWeightedNumber / totalWeightedNumber;
-            entropy -= p_i * DataUtil.log2(p_i);
+            entropy -= p_i * MathUtil.log2(p_i);
         }
         return entropy;
     }

@@ -3,6 +3,7 @@ package main.java.classify.decisionTree;
 import main.java.classify.Classifier;
 import main.java.core.DataSet;
 import main.java.core.Instance;
+import main.java.core.WeightHandler;
 
 import java.util.Map;
 
@@ -13,7 +14,7 @@ import java.util.Map;
  * @see DecisionTree
  * @see Classifier
  */
-public class DecisionTreeClassifier implements Classifier {
+public class DecisionTreeClassifier implements Classifier, WeightHandler {
 
     private final DecisionTree tree;
 

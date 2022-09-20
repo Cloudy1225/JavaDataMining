@@ -13,6 +13,12 @@ import org.junit.Test;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * Tests decision tree classifiers: ID3, C4.5, CART.
+ *
+ * @author Cloudy1225
+ * @see DecisionTreeClassifier
+ */
 public class DecisionTreeClassifierTest {
 
     @Test
@@ -141,18 +147,7 @@ public class DecisionTreeClassifierTest {
      * k-折交叉验证并打印结果
      */
     private void crossValidation(Classifier classifier, DataSet dataset) {
-        CrossValidation cv = new CrossValidation(classifier);
-        Map<Double, PerformanceMeasure> performance = cv.crossValidation(dataset, 5);
-        System.out.println("混淆矩阵");
-        System.out.println(performance);
-        System.out.println("精确率(预测为正，有多少是真的正）");
-        for (PerformanceMeasure p: performance.values()) {
-            System.out.println(p.getPrecision());
-        }
-        System.out.println("召回率（有多少正被预测出来）");
-        for (PerformanceMeasure p: performance.values()) {
-            System.out.println(p.getRecall());
-        }
+        ClassifierTestUtil.crossValidation(classifier, dataset, 5);
     }
 
     private void evaluate(DecisionTree tree, DataSet test) {
