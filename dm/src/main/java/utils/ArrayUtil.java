@@ -139,4 +139,20 @@ public class ArrayUtil {
         }
         return sum;
     }
+
+    /**
+     * Returns the value of the maximum element in the given array.
+     *
+     * @param values a double array
+     * @return value of the maximum element
+     */
+    public static double max(double[] values) {
+        double max = Double.MIN_VALUE;
+        for (double d: values) {
+            if (d > max) {
+                max = d;
+            }
+        }
+        return max;
+    }
 }

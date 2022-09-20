@@ -13,7 +13,7 @@
 
 源码：```src/main/java/classify/decisionTree```
 
-测试：```src/test/java/classify/decisionTree```
+测试：```src/test/java/classify/DecisionTreeClassifierTest.java```
 
 
 
@@ -186,3 +186,51 @@ DTNode buildTree(DataSet dataset, int depth) {
 最小代价复杂度剪枝：[Minimal Cost-Complexity Pruning](https://scikit-learn.org/stable/modules/tree.html#minimal-cost-complexity-pruning)
 
 调用```DecisionTree``` 的 ```Map<Double, DTNode> prunedSubTrees()```方法，将会得到从原始树剪枝到只有一个节点的过程中```alpha```与对应的子树。
+
+
+
+
+
+### 朴素贝叶斯 NaiveBayes
+
+[参考文档]([main.java.classify.bayes (cloudy1225.github.io)](https://cloudy1225.github.io/main/java/classify/bayes/package-summary.html))
+
+源码：```src/main/java/classify/bayes```
+
+测试：```src/test/java/classify/NaiveBayesClassifierTest.java```
+
+
+
+#### 类的设计
+
+```mermaid
+classDiagram
+	class NaiveBayesClassifier {
+		<<abstract>>
+		+predict(instance) Instance
+	}
+	class GaussianNB {
+		+fit(dataset) DataSet
+	}
+	class MultinomialNB {
+		+fit(dataset) DataSet
+	}
+	NaiveBayesClassifier <|-- GaussianNB
+	NaiveBayesClassifier <|-- MultinomialNB
+```
+
+
+
+##### GaussianNB
+
+极大似然估计：$P(x_i|y)=\frac{1}{\sqrt{2\pi\sigma_y^2}}\exp(-\frac{(x_i-\mu_y)^2}{2\sigma_y^2})$
+
+处理连续特征
+
+
+
+##### MultinomialNB
+
+贝叶斯估计：$P(x_i|y)=\frac{N_{yi}+\alpha}{N_y+\alpha n}$
+
+处理离散特征

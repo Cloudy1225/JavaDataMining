@@ -1,5 +1,6 @@
 package main.java.utils;
 
+
 import java.util.Map;
 
 /**
@@ -31,34 +32,33 @@ public class MapUtil {
     }
 
     /**
-     * Returns values of {@code Map<Double, Integer>} as an int array,
+     * Returns values of {@code Map<Double, Double>} as an double array,
      * in the order they are returned by the map's iterator.
      *
-     * @param map {@code Map<Double, Integer>}
-     * @return values as an int array
+     * @param map {@code Map<Double, Double>}
+     * @return values as an double array
      */
-    public static int[] mapValues(Map<Double, Integer> map) {
-        int[] res = new int[map.size()];
+    public static double[] mapValues(Map<Double, Double> map) {
+        double[] res = new double[map.size()];
         int i = 0;
-        for (Integer value: map.values()) {
+        for (Double value: map.values()) {
             res[i++] = value;
         }
         return res;
     }
 
     /**
-     * Returns the sum of values in a {@code Map<Double, Integer>}.
+     * Returns the sum of values in a {@code Map<Double, Double>}.
      *
-     * @param map {@code Map<Double, Integer>}
+     * @param map {@code Map<Double, Double>}
      * @param <K> the key's type
      * @return sum of values
      */
-    public static <K> int sumValues(Map<K, Integer> map) {
-        int sum = 0;
-        for (int i: map.values()) {
-            sum += i;
+    public static <K> double sumValues(Map<K, Double> map) {
+        double sum = 0;
+        for (double d: map.values()) {
+            sum += d;
         }
         return sum;
     }
-
 }

@@ -4,11 +4,23 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * This class provides some static methods to handle data.
+ * This class provides some static methods as complements of {@link Math}.
  *
- * @author Cloudy1224
+ * @author Cloudy1225
  */
-public class DataUtil {
+public class MathUtil {
+
+    /**
+     * The absolute tolerance parameter fot comparing doubles.
+     */
+    public static final double epsilon = 1e-6;
+
+    /**
+     * Tests if a is equal to b within a tolerance.
+     */
+    public static boolean eq(double a, double b) {
+        return ((a - b < epsilon) && (b - a < epsilon)) || (Double.isNaN(a) && Double.isNaN(b));
+    }
 
     /**
      * Returns the logarithm (base <i>2</i>) of a {@code double} value.
@@ -31,7 +43,7 @@ public class DataUtil {
      * @return true / false
      */
     public static boolean isContinuous(double[] data) {
-        return DataUtil.isContinuous(data, 0.3);
+        return MathUtil.isContinuous(data, 0.3);
     }
 
     /**

@@ -1,4 +1,4 @@
-package test.java.classify.decisionTree;
+package test.java.classify;
 
 import main.java.classify.Classifier;
 import main.java.classify.evaluation.CrossValidation;

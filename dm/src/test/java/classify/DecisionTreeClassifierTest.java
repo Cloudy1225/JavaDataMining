@@ -1,8 +1,7 @@
-package test.java.classify.decisionTree;
+package test.java.classify;
 
 import main.java.classify.Classifier;
 import main.java.classify.decisionTree.*;
-import main.java.classify.evaluation.CrossValidation;
 import main.java.classify.evaluation.PerformanceMeasure;
 import main.java.core.DataSet;
 import main.java.core.DataSets;
