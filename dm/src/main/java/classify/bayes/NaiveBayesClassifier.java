@@ -2,6 +2,7 @@ package main.java.classify.bayes;
 
 import main.java.classify.Classifier;
 import main.java.core.Instance;
+import main.java.core.WeightHandler;
 import main.java.core.exception.EstimatorNotFittedException;
 
 import java.util.Map;
@@ -10,9 +11,10 @@ import java.util.Map;
  * Abstract base class for naive Bayes classifiers.
  *
  * @author Cloudy1225
+ * @see Classifier
  * @see <a href="https://scikit-learn.org/stable/modules/naive_bayes.html#">naive_bayes</a>
  */
-public abstract class NaiveBayesClassifier implements Classifier {
+public abstract class NaiveBayesClassifier implements Classifier, WeightHandler {
 
     /**
      * Whether this is fitted yet.
@@ -54,6 +56,6 @@ public abstract class NaiveBayesClassifier implements Classifier {
      * @param instance the input instance
      * @return {@code Map}: key is the class, value is the posterior log probability
      */
-    protected abstract Map<Double, Double> jointLogLikelihood(Instance instance);
+    public abstract Map<Double, Double> jointLogLikelihood(Instance instance);
 
 }

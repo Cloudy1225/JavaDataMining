@@ -157,6 +157,7 @@ public abstract class DecisionTree implements Evaluatable, WeightHandler {
      *
      * @param instance the specified instance
      * @return class value for given instance
+     * @throws EstimatorNotFittedException if this decision tree is not fitted yet
      */
     public double predict(Instance instance) {
         if (this.root == null) {

@@ -7,6 +7,23 @@
 
 
 
+## 分类 Classification
+
+[API参考文档](https://cloudy1225.github.io/main/java/classify/package-summary.html)
+
+```mermaid
+classDiagram
+	class Classifier {
+		<<interface>>
+		+fit(DataSet dataset) void
+		+classify(Instance instance) double
+	}
+```
+
+
+
+
+
 ### 决策树 DecisionTree
 
 [API参考文档](https://cloudy1225.github.io/main/java/classify/decisionTree/package-summary.html)
@@ -14,6 +31,14 @@
 源码：```src/main/java/classify/decisionTree```
 
 测试：```src/test/java/classify/DecisionTreeClassifierTest.java```
+
+
+
+实现了三种决策树构建算法：``ID3, C4.5, CART``。
+
+其中 ``ID3Tree``只支持离散数据，``C45Tree``和``CartTree``既支持离散数据又支持连续数据，支持混合数据集。
+
+实现的算法支持赋予训练集权重
 
 
 
@@ -40,6 +65,31 @@
 
 
 #### 类的设计
+
+```mermaid
+classDiagram
+	class Classifier {
+		<<interface>>
+		+fit(DataSet dataset) void
+		+classify(Instance instance) double
+	}
+	class DecisionTreeClassifier
+	class DecisionTree {
+		<<abstract>>
+		- DTNode root
+		+predict(Instance instance) double
+	}
+	class ID3Tree
+	class C45Tree
+	class CartTree
+	DecisionTreeClassifier ..|> Classifier
+	DecisionTreeClassifier *-- DecisionTree
+	DecisionTree <|-- ID3Tree
+	DecisionTree <|-- C45Tree
+	DecisionTree <|-- CartTree
+```
+
+
 
 决策树节点类：
 
@@ -117,6 +167,75 @@ classDiagram
 
 - ```SplitRecord```：抽象父类，故定义该数据结构，保存特征选择结果：被选择特征的索引及其对应的度量值等，以用于数据集的划分和树节点的构建。
 - ```InfoGain, GainRatio, GiniIndex``` 继承 ```SplitRecord```，添加需要的变量如连续特征的最佳划分点等
+
+
+
+#### 公开方法
+
+```java
+**
+ * This is an abstract base class for implementing decision tree.
+ * Different subclasses should implement different algorithms to build a decision tree.
+ *
+ * @author Cloudy1225
+ * @see Evaluatable
+ * @see DecisionTreeClassifier
+ */
+public abstract class DecisionTree implements Evaluatable, WeightHandler {
+    /**
+     * Constructs a decision tree with given constraint conditions.
+     *
+     * @param maxDepth the maximum depth of the tree
+     * @param minSamplesSplit the minimum number of samples required to split an internal node
+     * @param minSamplesLeaf the minimum number of samples required to be at a leaf node
+     * @param minImpurityDecrease a node will be split if this split induces a decrease of the impurity greater than or equal to this value.
+     * @param ccpAlpha Complexity parameter used for Minimal Cost-Complexity Pruning
+     */
+    public DecisionTree(int maxDepth, int minSamplesSplit, int minSamplesLeaf, double minImpurityDecrease, double ccpAlpha) {}
+    
+    /**
+     * Builds a decision tree from the training set.
+     *
+     * @param dataset training set
+     */
+    public void fit(DataSet dataset);
+    
+     /**
+     * Predicts the class value for given instance.
+     *
+     * @param instance the specified instance
+     * @return class value for given instance
+     * @throws EstimatorNotFittedException if this decision tree is not fitted yet
+     */
+    public double predict(Instance instance);
+    
+    /**
+     * Prints this fitted decision tree.
+     *
+     * @throws EstimatorNotFittedException if this decision tree is not fitted yet
+     */
+    public void print();
+    
+    /**
+     * Returns a sequence of effective alphas and a sequence of pruned tree correspondingly.
+     *
+     * @return a sequence of effective alphas and a sequence of pruned tree correspondingly
+     * @throws EstimatorNotFittedException if this decision tree is not fitted yet
+     */
+    public Map<Double, DTNode> prunedSubTrees();
+    
+    /**
+     * Performs cross validation with the specified parameters.
+     *
+     * @param dataset the data set to use in the cross validation.
+     *                This data set is split in the appropriate number of folds.
+     * @param k the number of folds to create
+     * @return the results of the cross-validation.
+     */
+    @Override
+    public Map<Double, PerformanceMeasure> crossValidation(DataSet dataset, int k);
+}
+```
 
 
 
@@ -201,13 +320,24 @@ DTNode buildTree(DataSet dataset, int depth) {
 
 
 
+实现了两种算法，``GaussianNB``支持连续数据，``MultinomialNB``支持离散数据。
+
+实现的算法支持赋予训练集权重
+
+
+
 #### 类的设计
 
 ```mermaid
 classDiagram
+	class Classifier {
+		<<interface>>
+		+fit(DataSet dataset) void
+		+classify(Instance instance) double
+	}
 	class NaiveBayesClassifier {
 		<<abstract>>
-		+predict(instance) Instance
+		+predict(Instance instance) double
 	}
 	class GaussianNB {
 		+fit(dataset) DataSet
@@ -215,6 +345,7 @@ classDiagram
 	class MultinomialNB {
 		+fit(dataset) DataSet
 	}
+	NaiveBayesClassifier ..|> Classifier
 	NaiveBayesClassifier <|-- GaussianNB
 	NaiveBayesClassifier <|-- MultinomialNB
 ```
@@ -227,6 +358,22 @@ classDiagram
 
 处理连续特征
 
+支持预置类概率
+
+```java
+ /**
+  * Create a GaussianNB with given {@code varSmoothing}
+  * and given prior probabilities of the classes.
+  *
+  * @param priors prior probabilities of the classes
+  * @param varSmoothing portion of the largest variance of all features that is added to variances for calculation stability
+  */
+public GaussianNB(double[] priors, double varSmoothing) {
+    this.priors = priors;
+    this.varSmoothing = varSmoothing;
+}
+```
+
 
 
 ##### MultinomialNB
@@ -234,3 +381,188 @@ classDiagram
 贝叶斯估计：$P(x_i|y)=\frac{N_{yi}+\alpha}{N_y+\alpha n}$
 
 处理离散特征
+
+支持拉普拉斯平滑以及预置类概率
+
+```java
+/**
+ * Create a MultinomialNB with given {@code alpha}
+ * and given prior probabilities of the classes.
+ *
+ * @param priors prior probabilities of the classes
+ * @param alpha additive (Laplace/Lidstone) smoothing parameter
+ */
+public MultinomialNB(double[] priors, double alpha) {
+    this.priors = priors;
+    this.alpha = alpha;
+}
+```
+
+
+
+#### 公开方法
+
+```java
+/**
+ * Abstract base class for naive Bayes classifiers.
+ *
+ * @author Cloudy1225
+ * @see <a href="https://scikit-learn.org/stable/modules/naive_bayes.html#">naive_bayes</a>
+ */
+public abstract class NaiveBayesClassifier implements Classifier, WeightHandler {
+    @Override
+    public void fit(DataSet dataset);
+    
+    @Override
+    public double classify(Instance instance);
+    
+    /**
+     * Performs classification on the test instance.
+     *
+     * @param instance the input instance
+     * @return predicted target values
+     */
+    public double predict(Instance instance);
+    
+    /**
+     * Computes the unnormalized posterior log probability of given instance.
+     * I.e. ``log P(c) + log P(x|c)`` for given instance.
+     *
+     * @param instance the input instance
+     * @return {@code Map}: key is the class, value is the posterior log probability
+     */
+    public abstract Map<Double, Double> jointLogLikelihood(Instance instance);
+}
+```
+
+
+
+### K近邻 KNearestNeighbors
+
+[API参考文档]([main.java.classify.neighbors (cloudy1225.github.io)](https://cloudy1225.github.io/main/java/classify/neighbors/package-summary.html))
+
+源码：```src/main/java/classify/neighbors```
+
+测试：```src/test/java/classify/KNeighborsClassifierTest.java```
+
+
+
+
+
+实现了两种K近邻查找算法：暴力遍历``BruteKNNClassifier``与基于k-d 树查找``KDTreeKNNClassifier``，
+
+二者目前只支持连续数据，实现的算法支持赋予训练集权重
+
+
+
+#### 类的设计
+
+```mermaid
+classDiagram
+	class Classifier {
+		<<interface>>
+		+fit(DataSet dataset) void
+		+classify(Instance instance) double
+	}
+	class KNeighborsClassifier {
+		<<abstract>>
+		-int k
+		-String weights
+		-DistanceMetric metric
+		+kNeighbors(instance, k) Map~Instance, Double~
+	}
+	class BruteKNNClassifier
+	class KDTreeKNNClassifier {
+		-KDTree tree
+	}
+	class KDTree {
+		+query(instance, k, metric) Map~Instance, Double~
+	}
+	KNeighborsClassifier ..|> Classifier
+	KNeighborsClassifier <|--BruteKNNClassifier
+	KNeighborsClassifier <|-- KDTreeKNNClassifier
+	KDTreeKNNClassifier *-- KDTree
+```
+
+#### 公开方法
+
+```java
+/**
+ * Abstract base class for classifiers implementing the k-nearest neighbors vote.
+ *
+ * @author Cloudy1225
+ */
+public abstract class KNeighborsClassifier implements Classifier, WeightHandler {
+    /**
+     * Constructs with given parameters.
+     *
+     * @param k number of neighbors to use by default for kNeighbors queries.
+     * @param weights weight function used in prediction. Possible values:
+     *                "uniform": All points in each neighborhood are weighted equally.
+     *                "distance": Weight points by the inverse of their distance.
+     *                "gaussian": Weight points by standard normal distribution.
+     *                "custom": weight points by the weight of each instance.
+     * @param metric metric to use for distance computation
+     */
+    public KNeighborsClassifier(int k, String weights, DistanceMetric metric);
+    
+    @Override
+    public void fit(DataSet dataset);
+    
+    @Override
+    public double classify(Instance instance);
+    
+    /**
+     * Predicts the class value for given instance.
+     *
+     * @param instance the specified instance
+     * @return class value for given instance
+     */
+    public double predict(Instance instance);
+    
+     /**
+     * Finds the K-neighbors of given instance.
+     *
+     * @param instance given instance
+     * @param k number of neighbors to find
+     * @return the K-neighbors: instance and distance
+     * @throws EstimatorNotFittedException if this is not fitted yet
+     */
+    public abstract Map<Instance, Double> kNeighbors(Instance instance, int k);
+}
+```
+
+
+
+#### 距离度量
+
+- 实现了多种距离度量方式：欧式距离，曼哈顿距离……
+- 通过构造函数传入参数``DistanceMetric metric``即可
+- 默认为标准化欧式距离``SEuclideanDistance``: $d = \sqrt{\sum_i\frac{(x_i - y_i)^2}{Variance_i}}$
+- 允许自定义距离，实现接口``DistanceMetric``中的``measure``方法即可
+
+
+
+#### 分类决策
+
+- 多数表决规则，但允许设置权重
+- 通过构造函数传入参数``String weights``即可
+- ``weights``可选值：
+  - ``“distance”``：默认参数，权重为每个邻居距离的倒数，距离越远，权重越低，影响越小，即越相似影响越大
+  - ``“uniform”``：每个邻居的权重都相等，为 1 
+  - ``“gaussian”``：权重为$\frac{1}{\sqrt{2\pi}}e^{-\frac{d_i^2}{2}}$，权重越低，影响越小，即越相似影响越大
+  - ``“custom”``：自定义权重，在``fit``之前即为数据集中的每个``instance``设置权重，计算时直接``instance.getWeight()``
+
+
+
+#### KDTree
+
+##### 树的构建
+
+每次选择划分维度时选择方差最大的维度，而不是从0维度依次选取
+
+##### K近邻搜索
+
+利用``PriorityQueue`` 大顶堆保存邻居，利用``ArrayDeque``栈进行递归回溯查询。
+
+算法描述参见：[kd树算法原理详解及C++实现](https://blog.csdn.net/qq_29923461/article/details/119204500)

@@ -152,7 +152,7 @@ public class MultinomialNB extends NaiveBayesClassifier {
     }
 
     @Override
-    protected Map<Double, Double> jointLogLikelihood(Instance instance) {
+    public Map<Double, Double> jointLogLikelihood(Instance instance) {
         Map<Double, Double> res = new TreeMap<>();
         int i = 0;
         for (Double clazz: this.classCountMap.keySet()) {
