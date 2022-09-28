@@ -1,5 +1,5 @@
 /**
- * Provides K nearest neighbors classification algorithms: brute, k-d tree.
+ * Provides K/Radius nearest neighbors classification algorithms: brute, k-d tree.
  *
  * @author Cloudy1225
  */

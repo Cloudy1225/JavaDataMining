@@ -437,19 +437,21 @@ public abstract class NaiveBayesClassifier implements Classifier, WeightHandler 
 
 
 
-### K近邻 KNearestNeighbors
+### 近邻 NearestNeighbors
 
 [API参考文档]([main.java.classify.neighbors (cloudy1225.github.io)](https://cloudy1225.github.io/main/java/classify/neighbors/package-summary.html))
 
 源码：```src/main/java/classify/neighbors```
 
-测试：```src/test/java/classify/KNeighborsClassifierTest.java```
+测试：```src/test/java/classify/NeighborsClassifierTest.java```
 
 
 
+``K-Nearest-Neighbor``：选择最近的K个邻居
 
+``Radius-Nearest-Neighbor``：给定返回邻居的最大距离
 
-实现了两种K近邻查找算法：暴力遍历``BruteKNNClassifier``与基于k-d 树查找``KDTreeKNNClassifier``，
+实现了两种近邻查找算法：暴力遍历``BruteKNNClassifier, BruteRNNClassifier``与基于k-d 树查找``KDTreeKNNClassifier, KDTreeRNNClassifier``，
 
 二者目前只支持连续数据，实现的算法支持赋予训练集权重
 
@@ -479,10 +481,41 @@ classDiagram
 		+query(instance, k, metric) Map~Instance, Double~
 	}
 	KNeighborsClassifier ..|> Classifier
-	KNeighborsClassifier <|--BruteKNNClassifier
+	KNeighborsClassifier <|-- BruteKNNClassifier
 	KNeighborsClassifier <|-- KDTreeKNNClassifier
 	KDTreeKNNClassifier *-- KDTree
 ```
+
+
+
+```mermaid
+classDiagram
+	class Classifier {
+		<<interface>>
+		+fit(DataSet dataset) void
+		+classify(Instance instance) double
+	}
+	class RadiusNeighborsClassifier {
+		<<abstract>>
+		-double radius
+		-String weights
+		-DistanceMetric metric
+		+radiusNeighbors(instance, radius) Map~Instance, Double~
+	}
+	class BruteRNNClassifier
+	class KDTreeRNNClassifier {
+		-KDTree tree
+	}
+	class KDTree {
+		+queryRadius(instance, r, metric) Map~Instance, Double~
+	}
+	RadiusNeighborsClassifier ..|> Classifier
+	RadiusNeighborsClassifier <|-- BruteRNNClassifier
+	RadiusNeighborsClassifier <|-- KDTreeRNNClassifier
+	KDTreeRNNClassifier *-- KDTree
+```
+
+
 
 #### 公开方法
 
@@ -529,6 +562,54 @@ public abstract class KNeighborsClassifier implements Classifier, WeightHandler 
      * @throws EstimatorNotFittedException if this is not fitted yet
      */
     public abstract Map<Instance, Double> kNeighbors(Instance instance, int k);
+}
+```
+
+
+
+```java
+/**
+ * Abstract base class for classifiers implementing a vote among neighbors within a given radius.
+ *
+ * @author Cloudy1225
+ * @see Classifier
+ */
+public abstract class RadiusNeighborsClassifier implements Classifier, WeightHandler {
+
+    /**
+     * Constructs with given parameters.
+     *
+     * @param radius range of parameter space to use by default for radius_neighbors queries.
+     * @param weights weight function used in prediction. Possible values:
+     *                "uniform": All points in each neighborhood are weighted equally.
+     *                "distance": Weight points by the inverse of their distance.
+     *                "gaussian": Weight points by standard normal distribution.
+     *                "custom": weight points by the weight of each instance.
+     * @param metric metric to use for distance computation
+     */
+    public RadiusNeighborsClassifier(double radius, String weights, DistanceMetric metric); 
+
+    @Override
+    public double classify(Instance instance);
+
+    /**
+     * Predicts the class value for given instance.
+     *
+     * @param instance the specified instance
+     * @return class value for given instance
+     */
+    public double predict(Instance instance);
+
+    /**
+     * Finds the neighbors within a given radius of given instance.
+     *
+     * @param instance given instance
+     * @param radius limiting distance of neighbors to return.
+     * @return the sorted radius-neighbors: instance and distance
+     * @throws main.java.core.exception.EstimatorNotFittedException if this is not fitted yet
+     */
+    public abstract Map<Instance, Double> radiusNeighbors(Instance instance, double radius);
+    
 }
 ```
 

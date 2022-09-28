@@ -107,14 +107,13 @@ public class KDTree {
         }
         return (sumX_i2 - sumX_i/n*sumX_i) / n;
     }
-
     /**
      * Searches the tree for the k nearest neighbors.
      *
      * @param instance instance to query
      * @param k number of nearest neighbors to return
      * @param metric metric to use for distance computation
-     * @return the K-neighbors: instance and distance
+     * @return the sorted K-neighbors: instance and distance
      */
     public Map<Instance, Double> query(Instance instance, int k, DistanceMetric metric) {
         if (this.root == null) {
@@ -221,6 +220,109 @@ public class KDTree {
             kNeighbors.put(neighbor.instance, neighbor.distance);
         }
         return kNeighbors;
+    }
+
+    /**
+     * Searches the tree for neighbors within a radius r
+     *
+     * @param instance instance to query
+     * @param r limiting distance of neighbors to return
+     * @param metric metric to use for distance computation
+     * @return the sorted radius-neighbors: instance and distance
+     */
+    public Map<Instance, Double> queryRadius(Instance instance, double r, DistanceMetric metric) {
+        if (this.root == null) {
+            throw new EstimatorNotFittedException("KDTree is not fitted yet.");
+        }
+        ArrayList<InDistance> neighborBall = new ArrayList<>(); // 保存球内的邻居
+        ArrayDeque<KDNode> stack = new ArrayDeque<>();// 用于递归加回溯
+        KDNode curRoot = this.root;
+        // 寻找初始时instance所属于的叶节点
+        while (true) {
+            // 只有倒数第二层节点可能只有一个子树
+            stack.push(curRoot);
+            if (curRoot.left != null) { // 有左子树
+                if (instance.attribute(curRoot.feature) < curRoot.pivot) {
+                    curRoot = curRoot.left; // 小于中位数，走左子树
+                } else {
+                    if (curRoot.right != null) { // 大于等于中位数且有右子树，走右子树
+                        curRoot = curRoot.right;
+                    } else { // 有左子树，但无右子树，即倒数第二层的内部节点，只能走左子树
+                        curRoot = curRoot.left;
+                    }
+                }
+            } else if (curRoot.right != null){ // 无左子树，但有右子树，即倒数第二层的内部节点，只能走右子树
+                curRoot = curRoot.right;
+            } else { // 叶子节点
+                break;
+            }
+        }
+        while (!stack.isEmpty()) { // 栈空时，说明所有可能的近邻的已经遍历完
+            KDNode node = stack.poll();
+            List<Instance> candidates = node.instances; // 候选邻居
+            for (Instance candidate: candidates) {
+                double distance = metric.measure(instance, candidate);
+                if (distance <= r) {
+                    neighborBall.add(new InDistance(candidate, distance));
+                }
+            }
+            // 对于有左右子树的内部节点，回溯时另一个子树可能有候选邻居，故需要判断另一个树是否过去
+            // 对于叶子节点和只有一个子树的内部节点不需要回溯
+            if (node.left != null && node.right != null) {
+                // 且instance到分割面的距离不小于radius，则另一个子树没有候选邻居
+                double[] splitLineCoordinate = new double[this.dimensionality]; // 分割线的坐标
+                for (int i = 0; i < node.feature; i++) {
+                    splitLineCoordinate[i] = instance.attribute(i);
+                }
+                splitLineCoordinate[node.feature] = node.pivot;
+                for (int i = node.feature+1; i < this.dimensionality; i++) {
+                    splitLineCoordinate[i] = instance.attribute(i);
+                }
+                DenseInstance splitLine = new DenseInstance(splitLineCoordinate);
+                double distToSplitLine = metric.measure(instance, splitLine);
+                if (distToSplitLine >= r) { // instance到分割面的距离不小于当前邻居的最大距离
+                    continue; // 另一个子树无候选节点
+                }
+                // 由于是二叉树，要去另一个子树，只需要知道先去了哪个即可
+                if (instance.attribute(node.feature) < node.pivot) {  // 先去去左子树，则另一个子树为右子树
+                    curRoot = node.right;
+                } else {
+                    curRoot = node.left;
+                }
+                while (true) { // 寻找另一个子树中instance所属于的叶节点，同上
+                    // 只有倒数第二层节点可能只有一个子树
+                    stack.push(curRoot);
+                    if (curRoot.left != null) { // 有左子树
+                        if (instance.attribute(curRoot.feature) < curRoot.pivot) {
+                            curRoot = curRoot.left; // 小于中位数，走左子树
+                        } else {
+                            if (curRoot.right != null) { // 大于等于中位数且有右子树，走右子树
+                                curRoot = curRoot.right;
+                            } else { // 有左子树，但无右子树，即倒数第二层的内部节点，只能走左子树
+                                curRoot = curRoot.left;
+                            }
+                        }
+                    } else if (curRoot.right != null){ // 无左子树，但有右子树，即倒数第二层的内部节点，只能走右子树
+                        curRoot = curRoot.right;
+                    } else { // 叶子节点
+                        break;
+                    }
+                }
+            }
+        }
+        // 将保存邻居的堆转变为根据距离从小到大排列的Map
+        neighborBall.sort(new Comparator<InDistance>() {
+            @Override
+            public int compare(InDistance o1, InDistance o2) {
+                return Double.compare(o1.distance, o2.distance);
+            }
+        });
+        // LinkedHashMap保证了插入顺序
+        LinkedHashMap<Instance, Double> neighbors = new LinkedHashMap<>(neighborBall.size());
+        for (InDistance neighbor: neighborBall) {
+            neighbors.put(neighbor.instance, neighbor.distance);
+        }
+        return neighbors;
     }
 
     private static class KDNode {
